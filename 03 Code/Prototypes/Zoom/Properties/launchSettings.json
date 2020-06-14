@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Zoom": {
+      "commandName": "Project",
+      "commandLineArgs": "meetings -k egyo1KpHS6iji16atirEqg -s 2pRudfyGpDt0hdVqwV2egTmN9krBa1AkXxWD"
+    }
+  }
+}
