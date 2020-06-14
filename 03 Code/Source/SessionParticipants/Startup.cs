@@ -29,6 +29,12 @@ namespace SessionParticipants
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            services.AddCors(o => o.AddPolicy("AllowAll", builder =>
+            {
+                builder.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+            }));
             var configuredMeetings = new ConfiguredMeetings(Configuration);
             services.AddSingleton(configuredMeetings);
             services.Configure<ZoomCredentials>(Configuration.GetSection("ZoomCredentials"));
@@ -67,6 +73,7 @@ namespace SessionParticipants
             app.UseRouting();
 
             app.UseAuthorization();
+            app.UseCors("AllowAll");
 
             app.UseEndpoints(endpoints =>
             {
