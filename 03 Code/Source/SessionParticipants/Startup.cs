@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Bluehands.Diagnostics.LogExtensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -9,6 +10,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using NLog;
+using NLog.Extensions.Logging;
 using SessionParticipants.Domain;
 
 namespace SessionParticipants
@@ -30,6 +33,8 @@ namespace SessionParticipants
             services.AddSingleton(configuredMeetings);
             services.Configure<ZoomCredentials>(Configuration.GetSection("ZoomCredentials"));
             services.Configure<GeneralSettings>(Configuration.GetSection("GeneralSettings"));
+            services.AddLogging(loggingBuilder => { loggingBuilder.AddLogEnhancementWithNLog(); });
+            LogManager.Configuration = new NLogLoggingConfiguration(Configuration.GetSection("NLog"));
             services.AddSingleton<ISessionRepository, SessionRepository>();
         }
 
@@ -40,8 +45,13 @@ namespace SessionParticipants
             {
                 app.UseDeveloperExceptionPage();
             }
-
-            app.UseHttpsRedirection();
+            var log = new Log<Startup>();
+            app.UseLogCorrelation(log);
+            app.UseRequestLogTracing(log);
+            if (!env.IsDevelopment())
+            {
+                app.UseHttpsRedirection();
+            }
 
             app.UseRouting();
 

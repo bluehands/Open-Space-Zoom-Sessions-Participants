@@ -84,6 +84,17 @@ namespace SessionParticipants.Domain
             }
             return sessions;
         }
+
+        public Task UpdateSessionParticipantHasJoinedAsync(string sessionId, Participant participant)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task UpdateSessionParticipantHasLeftAsync(string sessionId, Participant participant)
+        {
+            throw new NotImplementedException();
+        }
+
         private List<Participant> GetAllParticipants()
         {
             var participants = new List<Participant>();

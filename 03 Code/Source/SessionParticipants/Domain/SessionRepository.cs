@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -16,6 +17,7 @@ namespace SessionParticipants.Domain
         private readonly ZoomService zoomService;
         private List<Session> sessions;
         private DateTime lastCacheUpdate = DateTime.MinValue;
+        private readonly SemaphoreSlim lockHandle = new SemaphoreSlim(1, 1);
 
         public SessionRepository(ILogger<SessionRepository> logger, IOptions<ZoomCredentials> zoomCredentials, ConfiguredMeetings configuredMeetings)
         {
@@ -29,6 +31,7 @@ namespace SessionParticipants.Domain
             {
                 try
                 {
+                    await lockHandle.WaitAsync();
                     if (sessions == null)
                     {
                         sessions = await LoadConfiguredSession();
@@ -55,8 +58,57 @@ namespace SessionParticipants.Domain
                     logger.Error(() => "Unexpeted error", ex);
                     throw;
                 }
-
+                finally
+                {
+                    lockHandle.Release();
+                }
                 return new List<Session>(sessions);
+            }
+        }
+
+        public async Task UpdateSessionParticipantHasJoinedAsync(string sessionId, Participant participant)
+        {
+            try
+            {
+                await lockHandle.WaitAsync();
+                var currentSessions = new List<Session>(sessions);
+                var currentSession = currentSessions.FirstOrDefault(s => s.Id.Equals(sessionId));
+                if (currentSession != null)
+                {
+                    if (!currentSession.Participants.Any(p => p.Equals(participant)))
+                    {
+                        currentSession.Participants.Add(participant);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.Error(() => "Unexpeted error", ex);
+                throw;
+            }
+            finally
+            {
+                lockHandle.Release();
+            }
+        }
+
+        public async Task UpdateSessionParticipantHasLeftAsync(string sessionId, Participant participant)
+        {
+            try
+            {
+                await lockHandle.WaitAsync();
+                var currentSessions = new List<Session>(sessions);
+                var currentSession = currentSessions.FirstOrDefault(s => s.Id.Equals(sessionId));
+                currentSession?.Participants.Remove(participant);
+            }
+            catch (Exception ex)
+            {
+                logger.Error(() => "Unexpeted error", ex);
+                throw;
+            }
+            finally
+            {
+                lockHandle.Release();
             }
         }
 
