@@ -35,7 +35,18 @@ namespace SessionParticipants
             services.Configure<GeneralSettings>(Configuration.GetSection("GeneralSettings"));
             services.AddLogging(loggingBuilder => { loggingBuilder.AddLogEnhancementWithNLog(); });
             LogManager.Configuration = new NLogLoggingConfiguration(Configuration.GetSection("NLog"));
+            var useTestData = Configuration.GetSection("GeneralSettings:UseTestData").Value;
             services.AddSingleton<ISessionRepository, SessionRepository>();
+            if (!string.IsNullOrEmpty(useTestData))
+            {
+                if (bool.TryParse(useTestData,out bool b)){
+                    if (b)
+                    {
+                        services.AddSingleton<ISessionRepository, SessionRepositoryMock>();
+                    }
+                }
+            }
+            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
