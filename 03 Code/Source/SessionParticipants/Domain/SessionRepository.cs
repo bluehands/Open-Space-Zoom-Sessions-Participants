@@ -39,6 +39,7 @@ namespace SessionParticipants.Domain
 
                     if (!IsCacheValid(cacheAge))
                     {
+                        logger.Trace(() => "Invalid cache. Load participants from zoom");
                         foreach (var session in sessions)
                         {
                             var participants = await zoomService.ListParticipants(session.Id).ConfigureAwait(false);
@@ -68,47 +69,53 @@ namespace SessionParticipants.Domain
 
         public async Task UpdateSessionParticipantHasJoinedAsync(string sessionId, Participant participant)
         {
-            try
+            using (logger.AutoTrace(()=>$"Session: {sessionId}; Participant: {participant.Name}"))
             {
-                await lockHandle.WaitAsync();
-                var currentSessions = new List<Session>(sessions);
-                var currentSession = currentSessions.FirstOrDefault(s => s.Id.Equals(sessionId));
-                if (currentSession != null)
+                try
                 {
-                    if (!currentSession.Participants.Any(p => p.Equals(participant)))
+                    await lockHandle.WaitAsync();
+                    var currentSessions = new List<Session>(sessions);
+                    var currentSession = currentSessions.FirstOrDefault(s => s.Id.Equals(sessionId));
+                    if (currentSession != null)
                     {
-                        currentSession.Participants.Add(participant);
+                        if (!currentSession.Participants.Any(p => p.Equals(participant)))
+                        {
+                            currentSession.Participants.Add(participant);
+                        }
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                logger.Error(() => "Unexpeted error", ex);
-                throw;
-            }
-            finally
-            {
-                lockHandle.Release();
+                catch (Exception ex)
+                {
+                    logger.Error(() => "Unexpeted error", ex);
+                    throw;
+                }
+                finally
+                {
+                    lockHandle.Release();
+                }
             }
         }
 
         public async Task UpdateSessionParticipantHasLeftAsync(string sessionId, Participant participant)
         {
-            try
+            using (logger.AutoTrace(() => $"Session: {sessionId}; Participant: {participant.Name}"))
             {
-                await lockHandle.WaitAsync();
-                var currentSessions = new List<Session>(sessions);
-                var currentSession = currentSessions.FirstOrDefault(s => s.Id.Equals(sessionId));
-                currentSession?.Participants.Remove(participant);
-            }
-            catch (Exception ex)
-            {
-                logger.Error(() => "Unexpeted error", ex);
-                throw;
-            }
-            finally
-            {
-                lockHandle.Release();
+                try
+                {
+                    await lockHandle.WaitAsync();
+                    var currentSessions = new List<Session>(sessions);
+                    var currentSession = currentSessions.FirstOrDefault(s => s.Id.Equals(sessionId));
+                    currentSession?.Participants.Remove(participant);
+                }
+                catch (Exception ex)
+                {
+                    logger.Error(() => "Unexpeted error", ex);
+                    throw;
+                }
+                finally
+                {
+                    lockHandle.Release();
+                }
             }
         }
 

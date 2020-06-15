@@ -12,62 +12,56 @@ namespace SessionParticipants.Domain
         }
         public async Task<List<Session>> GetSessionsAsync(TimeSpan unused)
         {
+            //Invalid meeting uri. Don't try
             var sessions = new List<Session>();
             sessions.Add(new Session
             {
                 Id = Guid.NewGuid().ToString().Substring(0, 10),
                 SortOrder = 0,
                 Title = "Mock #nossued Haupt Konferenzraum",
-                ParticipationUrl = new Uri("https://www.nossued.de")
-            });
-            sessions.Add(new Session
-            {
-                Id = Guid.NewGuid().ToString().Substring(0, 10),
-                SortOrder = 1,
-                Title = "Mock #nossued Hauptkonferenzraum",
-                ParticipationUrl = new Uri("https://www.nossued.de")
+                ParticipationUrl = new Uri("https://us02web.zoom.us/j/81445220666?pwd=QUhsc0hNdjNUaUl4SXRlWUNjTVo5dz09")
             });
             sessions.Add(new Session
             {
                 Id = Guid.NewGuid().ToString().Substring(0, 10),
                 SortOrder = 2,
                 Title = "Mock #nossued Track1",
-                ParticipationUrl = new Uri("https://www.nossued.de")
+                ParticipationUrl = new Uri("https://us02web.zoom.us/j/83238220666?pwd=eExKYXFmOEtHb2tSZ1VRL2Y0SHVwdz09")
             });
             sessions.Add(new Session
             {
                 Id = Guid.NewGuid().ToString().Substring(0, 10),
                 SortOrder = 3,
                 Title = "Mock #nossued Track2",
-                ParticipationUrl = new Uri("https://www.nossued.de")
+                ParticipationUrl = new Uri("https://us02web.zoom.us/j/85449220666?pwd=WDV2V1FGd1VUSFNtaGdTTGlkT0pidz09")
             });
             sessions.Add(new Session
             {
                 Id = Guid.NewGuid().ToString().Substring(0, 10),
                 SortOrder = 4,
                 Title = "Mock #nossued Track3",
-                ParticipationUrl = new Uri("https://www.nossued.de")
+                ParticipationUrl = new Uri("https://us02web.zoom.us/j/82712220666?pwd=eStBcGZDbnc0d05kUTdjeXlpNWJ2UT09")
             });
             sessions.Add(new Session
             {
                 Id = Guid.NewGuid().ToString().Substring(0, 10),
                 SortOrder = 5,
                 Title = "Mock #nossued Terrasse",
-                ParticipationUrl = new Uri("https://www.nossued.de")
+                ParticipationUrl = new Uri("https://us02web.zoom.us/j/81400220666?pwd=dFg3UkkxcDlqeW9COVYvbVF3VnZXQT09")
             });
             sessions.Add(new Session
             {
                 Id = Guid.NewGuid().ToString().Substring(0, 10),
                 SortOrder = 6,
                 Title = "Mock #nossued Café",
-                ParticipationUrl = new Uri("https://www.nossued.de")
+                ParticipationUrl = new Uri("https://us02web.zoom.us/j/84792220666?pwd=bzh6NE42Y0VMUGVOczkxTVp5QjJnZz09")
             });
             sessions.Add(new Session
             {
                 Id = Guid.NewGuid().ToString().Substring(0, 10),
                 SortOrder = 7,
                 Title = "Mock #nossued Flur",
-                ParticipationUrl = new Uri("https://www.nossued.de")
+                ParticipationUrl = new Uri("https://us02web.zoom.us/j/89018220666?pwd=N2x4bzJqeGVmSlQzTUMvZ09ha2FXdz09")
             });
             var rnd = new Random();
             var allParticipants = GetAllParticipants();

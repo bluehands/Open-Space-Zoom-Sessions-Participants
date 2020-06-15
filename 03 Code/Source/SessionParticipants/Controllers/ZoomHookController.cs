@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 using SessionParticipants.Domain;
 using Bluehands.Diagnostics.LogExtensions;
+// ReSharper disable InconsistentNaming
 
 namespace SessionParticipants.Controllers
 {
@@ -30,17 +27,25 @@ namespace SessionParticipants.Controllers
         [HttpPost]
         public async Task<IActionResult> Post([FromBody]HookData body)
         {
-            using (logger.AutoTrace(() => $"Id: {body.payload.@object.participant.user_id}; Meeting: {body.payload.@object.id}; Event: {body.@event}"))
+            //ToDO Check Verification code
+            using (logger.AutoTrace(() => $"Id: {body?.payload?.@object?.participant?.user_id}; Meeting: {body?.payload?.@object?.id}; Event: {body?.@event}"))
             {
-                var participant = new Participant { Id = body.payload.@object.participant.user_id, Name = body.payload.@object.participant.user_name };
-                if (body.@event.Equals("meeting.participant_joined"))
+                try
                 {
-                    await sessionRepository.UpdateSessionParticipantHasJoinedAsync(body.payload.@object.id, participant);
-                }
+                    var participant = new Participant { Id = body.payload.@object.participant.user_id, Name = body.payload.@object.participant.user_name };
+                    if (body.@event.Equals("meeting.participant_joined"))
+                    {
+                        await sessionRepository.UpdateSessionParticipantHasJoinedAsync(body.payload.@object.id, participant);
+                    }
 
-                if (body.@event.Equals("meeting.participant_left"))
+                    if (body.@event.Equals("meeting.participant_left"))
+                    {
+                        await sessionRepository.UpdateSessionParticipantHasLeftAsync(body.payload.@object.id, participant);
+                    }
+                }
+                catch (Exception ex)
                 {
-                    await sessionRepository.UpdateSessionParticipantHasLeftAsync(body.payload.@object.id, participant);
+                    logger.LogError(() => "Unexpected error", ex);
                 }
 
                 return Ok();
