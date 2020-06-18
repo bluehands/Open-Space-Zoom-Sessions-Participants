@@ -141,10 +141,17 @@ namespace SessionParticipants.Domain
                 var users = await zoomService.ListUsers().ConfigureAwait(false);
                 foreach (var user in users)
                 {
-                    var meetings = await zoomService.ListMeetings(user.Id, MeetingState.Scheduled).ConfigureAwait(false);
-                    foreach (var meeting in meetings)
+                    try
                     {
-                        allMeetings[meeting.Id] = meeting;
+                        var meetings = await zoomService.ListMeetings(user.Id, MeetingState.Scheduled).ConfigureAwait(false);
+                        foreach (var meeting in meetings)
+                        {
+                            allMeetings[meeting.Id] = meeting;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.Error(() => "Unexpected Error", ex);
                     }
                 }
 
